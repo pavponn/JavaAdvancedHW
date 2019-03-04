@@ -1,4 +1,4 @@
-package ru.ifmo.rain.Ponomarev.walk;
+package ru.ifmo.rain.ponomarev.walk;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

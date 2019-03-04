@@ -1,4 +1,4 @@
-package ru.ifmo.rain.Ponomarev.walk;
+package ru.ifmo.rain.ponomarev.walk;
 
 public class WalkerException extends Exception {
 
