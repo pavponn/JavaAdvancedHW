@@ -1,9 +1,26 @@
 # JavaAdvancedHW
-# Тесты к курсу «Технологии Java»
+
+## Тесты к курсу «Технологии Java»
 
 [Условия домашних заданий](http://www.kgeorgiy.info/courses/java-advanced/homeworks.html)
 
-## Домашнее задание 4. Implementor
+### Домашнее задание 5. JarImplementor
+
+Класс должен реализовывать интерфейс
+[JarImpler](modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor/JarImpler.java).
+
+Тестирование
+
+ * простой вариант:
+    ```info.kgeorgiy.java.advanced.implementor jar-interface <полное имя класса>```
+ * сложный вариант:
+    ```info.kgeorgiy.java.advanced.implementor jar-class <полное имя класса>```
+
+Исходный код тестов:
+
+* [простой вариант](modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor/InterfaceJarImplementorTest.java)
+* [сложный вариант](modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor/ClassJarImplementorTest.java)
+### Домашнее задание 4. Implementor
 
 Класс должен реализовывать интерфейс
 [Impler](modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor/Impler.java).
@@ -21,7 +38,7 @@
 * [сложный вариант](modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor/ClassImplementorTest.java)
 
 
-## Домашнее задание 3. Студенты
+### Домашнее задание 3. Студенты
 
 Тестирование
 
@@ -43,7 +60,7 @@
     [тесты](modules/info.kgeorgiy.java.advanced.student/info/kgeorgiy/java/advanced/student/AdvancedStudentGroupQueryTest.java)
 
 
-## Домашнее задание 2. ArraySortedSet
+### Домашнее задание 2. ArraySortedSet
 
 Тестирование
 
@@ -58,7 +75,7 @@
  * [сложный вариант](modules/info.kgeorgiy.java.advanced.arrayset/info/kgeorgiy/java/advanced/arrayset/NavigableSetTest.java)
 
 
-## Домашнее задание 1. Обход файлов
+### Домашнее задание 1. Обход файлов
 
 Для того, чтобы протестировать программу:
 
