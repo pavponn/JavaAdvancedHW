@@ -41,14 +41,15 @@ public class Implementor implements JarImpler {
     private final String COMMA = ", ";
 
     /**
-     * Entry point of program, can be used to choose whether .java or .jar file should be generated. If arguments don't
-     * satisfy one of the following options, method prints error message.
+     * Entry point of program, can be used to choose whether <tt>.java</tt> or <tt>.jar</tt> file should be generated.
+     * If arguments don't satisfy one of the following options, method prints error message.
      * <ul>
      * <li> <tt>interfaceName rootPath</tt> runs {@link #implement(Class, Path)} with these arguments</li>
      * <li><tt> -jar interfaceName jarPath</tt> runs {@link #implementJar(Class, Path)} with these arguments</li>
      * </ul>
      *
      * @param args arguments for program running
+     * @see Implementor#incorrectArgumentsMessage()
      */
     public static void main(String[] args) {
         JarImpler implementor = new Implementor();
@@ -71,25 +72,27 @@ public class Implementor implements JarImpler {
         } catch (ImplerException e) {
             System.err.println("Error occurred while implementing class " + args[0] + ":" + e.getMessage());
         }
-
     }
 
     /**
      * Constructs default instance of {@link Implementor}.
      */
-    Implementor() { }
+    Implementor() {
+    }
 
     /**
-     * @throws ImplerException when:
+     * @throws ImplerException if:
      *                         <ul>
      *                         <li>Some of the arguments are null </li>
      *                         <li>Some directories or files can't be created</li>
      *                         <li> {@link JavaCompiler} fails to compile implemented class</li>
-     *                         <li>Error occurred while implementing specific class</li>
+     *                         <li>Error occurred while implementing specified interface</li>
      *                         <li>I/O error occurred during implementation</li>
      *                         </ul>
-     *                         Uses {@link #implement(Class, Path)} to generate <tt>.java</tt> files which will be packed in <tt>.jar</tt> file.
-     *                         During implementation creates a temporary folder to store <tt>.java</tt> and <tt>.class</tt> files.
+     *                         Uses {@link #implement(Class, Path)} to generate <tt>.java</tt> files which will be
+     *                         packed in <tt>.jar</tt> file.
+     *                         During implementation creates a temporary folder to store <tt>.java</tt>
+     *                         and <tt>.class</tt> files.
      * @see #implement(Class, Path)
      * @see JarOutputStream
      */
@@ -122,12 +125,12 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * @throws ImplerException when:
+     * @throws ImplerException if:
      *                         <ul>
      *                         <li>Some of the arguments are null </li>
      *                         <li>Some directories or files can't be created</li>
      *                         <li> {@link JavaCompiler} fails to compile implemented class</li>
-     *                         <li>Error occurred while implementing specific class</li>
+     *                         <li>Error occurred while implementing specified interface</li>
      *                         <li>I/O error occurred during implementation</li>
      *                         </ul>
      *                         Uses {@link BufferedWriter} to create and to write <tt>.java</tt> file.
@@ -168,21 +171,21 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns a string representation of header of class which implements specific interface.
+     * Returns a string representation of header of class which implements specified interface.
      *
-     * @param token     {@link Class} an interface
-     * @param className name of class
-     * @return a header of class which implements specific interface
+     * @param token     {@link Class} an interface.
+     * @param className name of class.
+     * @return a header of class which implements specified interface.
      */
     private String getClassHeader(Class<?> token, String className) {
         return String.format("public class %s implements %s", className, token.getSimpleName());
     }
 
     /**
-     * Return a string representation of methods of specific interface. Methods implementations are default.
+     * Return a string representation of methods of specified interface. Methods implementations are default.
      * Uses {@link Implementor#getMethod(Method)} to create it.
      *
-     * @param token {@link Class} an interface
+     * @param token {@link Class} an interface.
      * @return a string representation of methods of interface <tt>token</tt>.
      */
     private String getMethods(Class<?> token) {
@@ -195,31 +198,23 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Return a string representation of specific method. String produced by this method can be used as a default
-     * method implementation. To create method representation uses:
-     * <ul>
-     * <li>{@link Implementor#getMethodHeader(Method)}</li>
-     * <li>{@link Implementor#getMethodReturn(Method)}</li>
-     * </ul>
+     * Return a string representation of specified method. String produced by this method can be used as a default
+     * method implementation. To create method representation uses: {@link Implementor#getMethodHeader(Method)}
+     * and {@link Implementor#getMethodReturn(Method)}
      *
-     * @param method {@link Method} a method
-     * @return a string representation of specific <tt>method</tt> (default implementation).
+     * @param method a method
+     * @return a string representation of specified <tt>method</tt> (default implementation).
      */
     private String getMethod(Method method) {
         return String.format("%s%s {%n%s%s%s %n}%n", TAB, getMethodHeader(method), TAB, TAB, getMethodReturn(method));
     }
 
     /**
-     * Returns a string representation of header of specific method. To make header uses:
-     * <ul>
-     * <li>{@link Implementor#getMethodModifiers(Method)} </li>
-     * <li> {@link Method#getReturnType()} </li>
-     * <li>{@link Method#getName()} </li>
-     * <li>{@link Implementor#getMethodArguments(Method)} </li>
-     * <li>{@link Implementor#getMethodExceptions(Method)} </li>
-     * </ul>
+     * Returns a string representation of header of specified method. To make header uses:
+     * {@link Implementor#getMethodModifiers(Method)}, {@link Method#getReturnType()}, {@link Method#getName()},
+     * {@link Implementor#getMethodArguments(Method)}, {@link Implementor#getMethodExceptions(Method)}.
      *
-     * @param method {@link Method} a method
+     * @param method a method.
      * @return a string representation of <tt>method</tt> header.
      */
     private String getMethodHeader(Method method) {
@@ -233,9 +228,9 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns a string representation modifiers of specific method except of {@link Modifier#ABSTRACT}.
+     * Returns a string representation modifiers of specified method except of {@link Modifier#ABSTRACT}.
      *
-     * @param method {@link Method} a method
+     * @param method a method.
      * @return a string which represents <tt>method</tt>'s modifiers.
      */
     private String getMethodModifiers(Method method) {
@@ -243,9 +238,9 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns a string representation of arguments of specific method.
+     * Returns a string representation of arguments of specified method.
      *
-     * @param method {@link Method} a method
+     * @param method a method.
      * @return a string concatenation of all  <tt>method</tt>'s arguments with their types and names.
      */
     private String getMethodArguments(Method method) {
@@ -256,11 +251,11 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns a string part of specific method header which contains exceptions.
+     * Returns a string part of specified method header which contains exceptions.
      *
-     * @param method {@link Method} a method
-     * @return concatenation of "throws " and  <tt>method</tt> exception classes joined by ", ".
-     * If  <tt>method</tt> doesn't throw anything returns empty string.
+     * @param method a method.
+     * @return concatenation of "throws " and  <tt>method</tt>'s exception classes joined by ", ".
+     * If <tt>method</tt> doesn't throw anything returns empty string.
      */
     private String getMethodExceptions(Method method) {
         Class<?>[] methodExceptions = method.getExceptionTypes();
@@ -274,9 +269,9 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns a string which represents default return statement in code for specific method.
+     * Returns a string which represents default return statement in code for specified method.
      *
-     * @param method {@link Method} a method
+     * @param method a method.
      * @return one of the following options:
      * <ul>
      * <li>"if <tt>method</tt> return type is {@link Void} </li>
@@ -300,8 +295,8 @@ public class Implementor implements JarImpler {
     /**
      * Creates all necessary parent directories up to file.
      *
-     * @param path {@link Path} path to be created.
-     * @throws ImplerException if {@link IOException} occurs in {@link Files#createDirectories(Path, FileAttribute[])}
+     * @param path path to be created.
+     * @throws ImplerException if {@link IOException} occurs in {@link Files#createDirectories(Path, FileAttribute[])}.
      */
     private void createDirectory(Path path) throws ImplerException {
         if (path.getParent() != null) {
@@ -314,12 +309,12 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Gets path to specific created file.
+     * Gets path to specified created file. File name is defined by {@link Implementor#getImplClassName(Class)}.
      *
-     * @param token  {@link Class} interface which is implemented
-     * @param root   {@link Path} root directory
-     * @param suffix file suffix
-     * @return full {@link Path} path to specific file.
+     * @param token  interface which is implemented.
+     * @param root   root directory.
+     * @param suffix file suffix.
+     * @return full path to specified file.
      */
     private Path getPathToCreatedFile(Class<?> token, Path root, String suffix) {
         return root.resolve(getPackageName(token).replace('.', File.separatorChar))
@@ -327,14 +322,14 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Creates path to specific file. Uses {@link Files#createDirectories(Path, FileAttribute[])} to create necessary
-     * directories.
+     * Creates path to specified file. Uses {@link Files#createDirectories(Path, FileAttribute[])} to create necessary
+     * directories. File name is defined by {@link Implementor#getImplClassName(Class)}.
      *
-     * @param token  {@link Class} interface which is implemented
-     * @param root   {@link Path} root directory
-     * @param suffix file suffix
-     * @return {@link Path} path to created file
-     * @throws IOException when error occurs while creating directory.
+     * @param token  interface which is implemented.
+     * @param root   root directory.
+     * @param suffix file suffix.
+     * @return path to created file.
+     * @throws IOException if error occurs while creating directory.
      */
     private Path createPathToFile(Class<?> token, Path root, String suffix) throws IOException {
         root = root.resolve(getPackageName(token).replace(".", File.separator) + File.separator);
@@ -343,11 +338,11 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Compiles java file which is implementation of specific interface. Uses {@link JavaCompiler} to compile files.
+     * Compiles java file which is implementation of specified interface. Uses {@link JavaCompiler} to compile files.
      *
-     * @param dir   {@link Path} root directory of <tt>token</tt> implementation file.
-     * @param token {@link Class} interface which is implemented.
-     * @throws ImplerException when java files can't be compiled.
+     * @param dir   root directory of <tt>token</tt> implementation file.
+     * @param token interface which is implemented.
+     * @throws ImplerException if java files can't be compiled.
      */
     private void compileJavaFiles(Path dir, Class<?> token) throws ImplerException {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -363,9 +358,9 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Gets a package name.
+     * Gets a package name of specified interface.
      *
-     * @param token {@link Class} an interface to get a package for.
+     * @param token an interface to get a package for.
      * @return package of <code>token</code>, if <code>token</code> has no package returns "".
      */
 
@@ -376,9 +371,9 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Gets a name of class which implements specific interface.
+     * Gets a name of class which implements specified interface.
      *
-     * @param token {@link Class} an interface to get a name for.
+     * @param token an interface to get a name for.
      * @return concatenation of {@link Class#getSimpleName()} and "Impl".
      */
     private String getImplClassName(Class<?> token) {
@@ -387,6 +382,7 @@ public class Implementor implements JarImpler {
 
     /**
      * Returns standard {@link Manifest} instance for <tt>.jar</tt> file with specified vendor.
+     * <tt>MANIFEST_VERSION</tt> is set to "1.0".
      *
      * @param vendor name of implementation vendor
      * @return {@link Manifest} instance with specified vendor.
@@ -399,7 +395,7 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Prints error message.
+     * Prints error message on a console.
      *
      * @see Implementor#main(String[])
      */
