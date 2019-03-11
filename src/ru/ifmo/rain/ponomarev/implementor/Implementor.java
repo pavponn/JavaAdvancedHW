@@ -12,10 +12,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Arrays;
 import java.util.jar.Attributes;
@@ -41,11 +39,12 @@ public class Implementor implements JarImpler {
     private final String COMMA = ", ";
 
     /**
-     * Entry point of program, can be used to choose whether <tt>.java</tt> or <tt>.jar</tt> file should be generated.
+     * Entry point of program, can be used to choose whether <code>.java</code> or <code>.jar</code> file should be
+     * generated.
      * If arguments don't satisfy one of the following options, method prints error message.
      * <ul>
-     * <li> <tt>interfaceName rootPath</tt> runs {@link #implement(Class, Path)} with these arguments</li>
-     * <li><tt> -jar interfaceName jarPath</tt> runs {@link #implementJar(Class, Path)} with these arguments</li>
+     * <li> <code>interfaceName rootPath</code> runs {@link #implement(Class, Path)} with these arguments</li>
+     * <li><code> -jar interfaceName jarPath</code> runs {@link #implementJar(Class, Path)} with these arguments</li>
      * </ul>
      *
      * @param args arguments for program running
@@ -53,6 +52,10 @@ public class Implementor implements JarImpler {
      */
     public static void main(String[] args) {
         JarImpler implementor = new Implementor();
+        if (args == null) {
+            incorrectArgumentsMessage();
+            return;
+        }
         try {
             if (args.length == 3 && args[0] != null && args[1] != null && args[2] != null) {
                 if (args[0].equals("-jar")) {
@@ -77,7 +80,7 @@ public class Implementor implements JarImpler {
     /**
      * Constructs default instance of {@link Implementor}.
      */
-    Implementor() {
+    public Implementor() {
     }
 
     /**
@@ -87,12 +90,13 @@ public class Implementor implements JarImpler {
      *                         <li>Some directories or files can't be created</li>
      *                         <li> {@link JavaCompiler} fails to compile implemented class</li>
      *                         <li>Error occurred while implementing specified interface</li>
-     *                         <li>I/O error occurred during implementation</li>
+     *                         <li>I/O error occurred during implementation or during deleting temporary files and
+     *                         directories</li>
      *                         </ul>
-     *                         Uses {@link #implement(Class, Path)} to generate <tt>.java</tt> files which will be
-     *                         packed in <tt>.jar</tt> file.
-     *                         During implementation creates a temporary folder to store <tt>.java</tt>
-     *                         and <tt>.class</tt> files.
+     *                         Uses {@link #implement(Class, Path)} to generate <code>.java</code> files which will be
+     *                         packed in <code>.jar</code> file.
+     *                         During implementation creates a temporary folder to store <code>.java</code>
+     *                         and <code>.class</code> files.
      * @see #implement(Class, Path)
      * @see JarOutputStream
      */
@@ -109,17 +113,23 @@ public class Implementor implements JarImpler {
             throw new ImplerException("Can't create temp dir for generated java file: " + e.getMessage());
         }
 
-        tempDir.toFile().deleteOnExit();
         implement(token, tempDir);
         compileJavaFiles(tempDir, token);
 
         Manifest manifest = getManifest("Pavel Ponomarev");
 
         try (JarOutputStream outputStream = new JarOutputStream(Files.newOutputStream(jarFile), manifest)) {
-            outputStream.putNextEntry(new ZipEntry(token.getName().replace('.', '/') + "Impl.class"));
+            outputStream.putNextEntry(new ZipEntry(token.getName().replace('.', '/') +
+                    "Impl.class"));
             Files.copy(getPathToCreatedFile(token, tempDir, ".class"), outputStream);
         } catch (IOException e) {
             throw new ImplerException("Can't write jar file: " + e.getMessage());
+        } finally {
+            try {
+                recursiveDeleteOnExit(tempDir);
+            } catch (IOException e) {
+                throw new ImplerException("Can't delete temporary files and directories: " + e.getMessage());
+            }
         }
 
     }
@@ -133,7 +143,7 @@ public class Implementor implements JarImpler {
      *                         <li>Error occurred while implementing specified interface</li>
      *                         <li>I/O error occurred during implementation</li>
      *                         </ul>
-     *                         Uses {@link BufferedWriter} to create and to write <tt>.java</tt> file.
+     *                         Uses {@link BufferedWriter} to create and to write <code>.java</code> file.
      */
     @Override
     public void implement(Class<?> token, Path root) throws ImplerException {
@@ -178,7 +188,7 @@ public class Implementor implements JarImpler {
      * @return a header of class which implements specified interface.
      */
     private String getClassHeader(Class<?> token, String className) {
-        return String.format("public class %s implements %s", className, token.getSimpleName());
+        return String.format("public class %s implements %s", className, token.getCanonicalName());
     }
 
     /**
@@ -186,7 +196,7 @@ public class Implementor implements JarImpler {
      * Uses {@link Implementor#getMethod(Method)} to create it.
      *
      * @param token {@link Class} an interface.
-     * @return a string representation of methods of interface <tt>token</tt>.
+     * @return a string representation of methods of interface <code>token</code>.
      */
     private String getMethods(Class<?> token) {
         StringBuilder builder = new StringBuilder();
@@ -202,8 +212,8 @@ public class Implementor implements JarImpler {
      * method implementation. To create method representation uses: {@link Implementor#getMethodHeader(Method)}
      * and {@link Implementor#getMethodReturn(Method)}
      *
-     * @param method a method
-     * @return a string representation of specified <tt>method</tt> (default implementation).
+     * @param method specified method.
+     * @return a string representation of specified <code>method</code> (default implementation).
      */
     private String getMethod(Method method) {
         return String.format("%s%s {%n%s%s%s %n}%n", TAB, getMethodHeader(method), TAB, TAB, getMethodReturn(method));
@@ -214,8 +224,8 @@ public class Implementor implements JarImpler {
      * {@link Implementor#getMethodModifiers(Method)}, {@link Method#getReturnType()}, {@link Method#getName()},
      * {@link Implementor#getMethodArguments(Method)}, {@link Implementor#getMethodExceptions(Method)}.
      *
-     * @param method a method.
-     * @return a string representation of <tt>method</tt> header.
+     * @param method specified method.
+     * @return a string representation of <code>method</code> header.
      */
     private String getMethodHeader(Method method) {
         return String.format("%s %s %s (%s) %s",
@@ -230,8 +240,8 @@ public class Implementor implements JarImpler {
     /**
      * Returns a string representation modifiers of specified method except of {@link Modifier#ABSTRACT}.
      *
-     * @param method a method.
-     * @return a string which represents <tt>method</tt>'s modifiers.
+     * @param method specified method.
+     * @return a string which represents <code>method</code>'s modifiers.
      */
     private String getMethodModifiers(Method method) {
         return Modifier.toString(method.getModifiers() & (Modifier.methodModifiers() ^ Modifier.ABSTRACT));
@@ -240,8 +250,8 @@ public class Implementor implements JarImpler {
     /**
      * Returns a string representation of arguments of specified method.
      *
-     * @param method a method.
-     * @return a string concatenation of all  <tt>method</tt>'s arguments with their types and names.
+     * @param method specified method.
+     * @return a string concatenation of all  <code>method</code>'s arguments with their types and names.
      */
     private String getMethodArguments(Method method) {
         Parameter[] parameters = method.getParameters();
@@ -253,9 +263,9 @@ public class Implementor implements JarImpler {
     /**
      * Returns a string part of specified method header which contains exceptions.
      *
-     * @param method a method.
-     * @return concatenation of "throws " and  <tt>method</tt>'s exception classes joined by ", ".
-     * If <tt>method</tt> doesn't throw anything returns empty string.
+     * @param method specified method.
+     * @return concatenation of "throws " and  <code>method</code>'s exception classes joined by ", ".
+     * If <code>method</code> doesn't throw anything returns empty string.
      */
     private String getMethodExceptions(Method method) {
         Class<?>[] methodExceptions = method.getExceptionTypes();
@@ -271,12 +281,12 @@ public class Implementor implements JarImpler {
     /**
      * Returns a string which represents default return statement in code for specified method.
      *
-     * @param method a method.
+     * @param method specified method.
      * @return one of the following options:
      * <ul>
-     * <li>"if <tt>method</tt> return type is {@link Void} </li>
-     * <li>"return true;" if <tt>method</tt> return type is {@link Boolean} </li>
-     * <li>"return 0;" if <tt>method</tt> return type is {@link javax.lang.model.type.PrimitiveType} </li>
+     * <li>"if <code>method</code> return type is {@link Void} </li>
+     * <li>"return true;" if <code>method</code> return type is {@link Boolean} </li>
+     * <li>"return 0;" if <code>method</code> return type is {@link javax.lang.model.type.PrimitiveType} </li>
      * <li>"return null;" otherwise </li>
      * </ul>
      */
@@ -340,20 +350,17 @@ public class Implementor implements JarImpler {
     /**
      * Compiles java file which is implementation of specified interface. Uses {@link JavaCompiler} to compile files.
      *
-     * @param dir   root directory of <tt>token</tt> implementation file.
+     * @param dir   root directory of <code>token</code> implementation file.
      * @param token interface which is implemented.
      * @throws ImplerException if java files can't be compiled.
      */
     private void compileJavaFiles(Path dir, Class<?> token) throws ImplerException {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        String classPath = dir.toString() + File.pathSeparator +
-                token.getProtectionDomain().getCodeSource().getLocation().getPath() + File.pathSeparator +
-                System.getProperty("java.class.path");
-        String[] arguments =
-                {"-cp", classPath, "-encoding", "UTF8",
-                        getPathToCreatedFile(token, dir, ".java").toString()};
-        if (compiler.run(System.in, System.out, System.err, arguments) != 0) {
-            throw new ImplerException("Can't compile files");
+        String classPath = dir.toString() + File.pathSeparator + System.getProperty("java.class.path");
+        String[] arguments = {"-cp", classPath, "-encoding", "UTF8",
+                getPathToCreatedFile(token, dir, ".java").toString()};
+        if (compiler == null || compiler.run(System.in, System.out, System.err, arguments) != 0) {
+            throw new ImplerException("Can't compile files due to some reason.");
         }
     }
 
@@ -381,8 +388,8 @@ public class Implementor implements JarImpler {
     }
 
     /**
-     * Returns standard {@link Manifest} instance for <tt>.jar</tt> file with specified vendor.
-     * <tt>MANIFEST_VERSION</tt> is set to "1.0".
+     * Returns standard {@link Manifest} instance for <code>.jar</code> file with specified vendor.
+     * <code>MANIFEST_VERSION</code> is set to "1.0".
      *
      * @param vendor name of implementation vendor
      * @return {@link Manifest} instance with specified vendor.
@@ -392,6 +399,29 @@ public class Implementor implements JarImpler {
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VENDOR, vendor);
         return manifest;
+    }
+
+    /**
+     * Recursively delete directories and files from specified path. Uses {@link Files#walkFileTree(Path, FileVisitor)}
+     * to walk through directories. Deletes files after JVM finishes.
+     *
+     * @param path path which specifies a path to start a recursive delete with.
+     * @throws IOException if an IO error is thrown by a visitor method
+     */
+    private void recursiveDeleteOnExit(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                file.toFile().deleteOnExit();
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                dir.toFile().deleteOnExit();
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     /**
