@@ -2,3 +2,4 @@ Manifest-Version: 1.0
 Created-By: 11.0.2 (Oracle Corporation)
 Implementation-Vendor: Pavel Ponomarev
 Main-Class: ru.ifmo.rain.ponomarev.implementor.Implementor
+Class-Path: .

@@ -1,6 +1,6 @@
-HW_NAME=implementor
-HW_MAIN_CLASS=Implementor
-TEST_MODE=jar-interface
+HW_NAME=concurrent
+HW_MAIN_CLASS=IterativeParallelism
+TEST_MODE=scalar
 
 HW_PACKAGE_DIR=ru/ifmo/rain/ponomarev/$HW_NAME
 HW_PACKAGE=ru.ifmo.rain.ponomarev.$HW_NAME
@@ -15,7 +15,7 @@ echo "*****************************************"
 echo "Compiling files"
 echo "*****************************************"
 
-javac -p ${MODULE_PATH} -d ${OUTPUT_DIR} src/${HW_PACKAGE_DIR}/*.java --add-modules info.kgeorgiy.java.advanced.implementor
+javac -p ${MODULE_PATH} -d ${OUTPUT_DIR} src/${HW_PACKAGE_DIR}/*.java --add-modules info.kgeorgiy.java.advanced.concurrent
 
 echo "*****************************************"
 echo "Run Tests"
