@@ -1,5 +1,5 @@
-HW_NAME=concurrent
-HW_MAIN_CLASS=IterativeParallelism
+HW_NAME=mapper
+HW_MAIN_CLASS=ParallelMapperImpl
 TEST_MODE=scalar
 
 HW_PACKAGE_DIR=ru/ifmo/rain/ponomarev/$HW_NAME
@@ -15,12 +15,12 @@ echo "*****************************************"
 echo "Compiling files"
 echo "*****************************************"
 
-javac -p ${MODULE_PATH} -d ${OUTPUT_DIR} src/${HW_PACKAGE_DIR}/*.java --add-modules info.kgeorgiy.java.advanced.concurrent
+javac -p ${MODULE_PATH} -d ${OUTPUT_DIR} src/${HW_PACKAGE_DIR}/*.java --add-modules info.kgeorgiy.java.advanced.mapper
 
 echo "*****************************************"
 echo "Run Tests"
 echo "*****************************************"
 
-java -cp ${COMPILE_CLASSPATH} -p ${MODULE_PATH} -m $TEST_PACKAGE $TEST_MODE $HW_PACKAGE.$HW_MAIN_CLASS
+java -cp ${COMPILE_CLASSPATH} -p ${MODULE_PATH} -m $TEST_PACKAGE $TEST_MODE $HW_PACKAGE.$HW_MAIN_CLASS,$HW_PACKAGE.IterativeParallelism
 
 

@@ -1,6 +1,8 @@
-package ru.ifmo.rain.ponomarev.concurrent;
+package ru.ifmo.rain.ponomarev.mapper;
 
 import info.kgeorgiy.java.advanced.concurrent.ScalarIP;
+import info.kgeorgiy.java.advanced.mapper.ParallelMapper;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,6 +13,14 @@ import java.util.stream.Stream;
 
 
 public class IterativeParallelism implements ScalarIP {
+    private ParallelMapper mapper;
+
+    public  IterativeParallelism() {
+        mapper = null;
+    }
+    public IterativeParallelism(ParallelMapper mapper) {
+        this.mapper = mapper;
+    }
 
     @Override
     public <T> T maximum(int i, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException,
@@ -50,26 +60,41 @@ public class IterativeParallelism implements ScalarIP {
 
     private <T, E> List<E> calculateFunction(List<? extends T> list, int threadsNumber,
                                              Function<Stream<? extends T>, E> function) throws InterruptedException {
+
         threadsNumber = Math.max(Math.min(threadsNumber, list.size()), 1);
+
         int elementsPerOneThread = list.size() / threadsNumber;
         int elementsLeft = list.size() % threadsNumber;
+
         Thread[] threadList = new Thread[threadsNumber];
-        List<E> resultList = new ArrayList<>(threadsNumber);
+        List<Stream<? extends T>> subTasks = new ArrayList<>();
 
         int leftBorder = 0;
         for (int i = 0; i < threadsNumber; ++i) {
             int rightBorder = leftBorder + elementsPerOneThread + ((elementsLeft > 0) ? 1 : 0);
             --elementsLeft;
             final int finalLeftBorder = leftBorder;
-            Thread currentThread = new Thread(() -> resultList.
-                    add(function.apply((list.subList(finalLeftBorder, rightBorder)).stream())));
-            currentThread.start();
-            threadList[i] = currentThread;
+            subTasks.add((list.subList(finalLeftBorder, rightBorder).stream()));
             leftBorder = rightBorder;
         }
-        for (int i = 0; i < threadsNumber; ++i) {
-            threadList[i].join();
+
+        if (mapper != null) {
+            List<E> resultList;
+            resultList = mapper.map(function, subTasks);
+            return resultList;
+        } else {
+
+            List<E> resultList = new ArrayList<>();
+            for (int i = 0; i < threadsNumber; ++i) {
+                final int index = i;
+                Thread currentThread = new Thread(() -> resultList.add(function.apply(subTasks.get(index))));
+                currentThread.start();
+                threadList[index] = currentThread;
+            }
+            for (int i = 0; i < threadsNumber; ++i) {
+                threadList[i].join();
+            }
+            return resultList;
         }
-        return resultList;
     }
 }
