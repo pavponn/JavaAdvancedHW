@@ -21,6 +21,6 @@ echo "*****************************************"
 echo "Run Tests"
 echo "*****************************************"
 
-java -cp ${COMPILE_CLASSPATH} -p ${MODULE_PATH} -m $TEST_PACKAGE $TEST_MODE $HW_PACKAGE.$HW_MAIN_CLASS,$HW_PACKAGE.IterativeParallelism
+java -cp ${COMPILE_CLASSPATH} -p ${MODULE_PATH} -m $TEST_PACKAGE $TEST_MODE $HW_PACKAGE.$HW_MAIN_CLASS,$HW_PACKAGE.IterativeParallelism $1
 
 

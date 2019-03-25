@@ -11,13 +11,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-
 public class IterativeParallelism implements ScalarIP {
     private ParallelMapper mapper;
 
     public  IterativeParallelism() {
         mapper = null;
     }
+
     public IterativeParallelism(ParallelMapper mapper) {
         this.mapper = mapper;
     }
@@ -77,13 +77,11 @@ public class IterativeParallelism implements ScalarIP {
             subTasks.add((list.subList(finalLeftBorder, rightBorder).stream()));
             leftBorder = rightBorder;
         }
-
         if (mapper != null) {
             List<E> resultList;
             resultList = mapper.map(function, subTasks);
             return resultList;
         } else {
-
             List<E> resultList = new ArrayList<>();
             for (int i = 0; i < threadsNumber; ++i) {
                 final int index = i;

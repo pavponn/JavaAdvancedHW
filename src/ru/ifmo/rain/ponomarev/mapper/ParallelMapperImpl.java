@@ -9,11 +9,10 @@ import java.util.function.Function;
 
 import static java.util.Arrays.stream;
 
-
 public class ParallelMapperImpl implements ParallelMapper {
     private Thread[] workers;
     private final Queue<Runnable> queue;
-    private final static int QUEUE_MAX_SIZE = 1_000_000;
+    private final static int QUEUE_MAX_SIZE = 1_000_117;
 
     public ParallelMapperImpl(int threads) throws IllegalArgumentException {
         if (threads < 1) {
@@ -57,12 +56,11 @@ public class ParallelMapperImpl implements ParallelMapper {
     private void add(Runnable newTask) throws InterruptedException {
         synchronized (queue) {
             while (queue.size() == QUEUE_MAX_SIZE) {
-                wait();
+                queue.wait();
             }
             queue.add(newTask);
-            queue.notify();
+            queue.notifyAll();
         }
-
     }
 
     private void calculate() throws InterruptedException {
@@ -72,7 +70,7 @@ public class ParallelMapperImpl implements ParallelMapper {
                 queue.wait();
             }
             task = queue.poll();
-            queue.notify();
+            queue.notifyAll();
         }
         task.run();
     }
@@ -88,5 +86,4 @@ public class ParallelMapperImpl implements ParallelMapper {
         }
         return noException;
     }
-
 }

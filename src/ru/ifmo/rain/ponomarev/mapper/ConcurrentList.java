@@ -13,20 +13,15 @@ public class ConcurrentList<T> {
         size = 0;
     }
 
-    public void set(int index, T value) {
-        synchronized (list) {
-            list.set(index, value);
-        }
-
-        synchronized (this) {
-            ++size;
-            if (size == list.size()) {
-                notify();
-            }
+    public synchronized void set(int index, T value) {
+        list.set(index, value);
+        ++size;
+        if (size == list.size()) {
+            notify();
         }
     }
 
-    synchronized List<T> getList() throws InterruptedException {
+    public synchronized List<T> getList() throws InterruptedException {
         while (size < list.size()) {
             wait();
         }
