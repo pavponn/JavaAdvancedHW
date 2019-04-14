@@ -14,6 +14,11 @@ public class ParallelMapperImpl implements ParallelMapper {
     private final Queue<Runnable> queue;
     private final static int QUEUE_MAX_SIZE = 1_000_117;
 
+    /**
+     * Allocates <code>ParallelMapper</code> object and sets <code>mapper</code> to specified mapper.
+     * @param threads number of threads to be used.
+     * @throws IllegalArgumentException if <code>threads</code> are less then 1.
+     */
     public ParallelMapperImpl(int threads) throws IllegalArgumentException {
         if (threads < 1) {
             throw new IllegalArgumentException("Thread number can't less than 1");
@@ -37,6 +42,12 @@ public class ParallelMapperImpl implements ParallelMapper {
         }
     }
 
+    /**
+     * Maps function {@code f} over specified {@code args}.
+     * Mapping for each element performs in parallel.
+     *
+     * @throws InterruptedException if calling thread was interrupted
+     */
     @Override
     public <T, R> List<R> map(Function<? super T, ? extends R> function, List<? extends T> list) throws InterruptedException {
         final ConcurrentList<R> results = new ConcurrentList<>(list.size());
@@ -47,6 +58,9 @@ public class ParallelMapperImpl implements ParallelMapper {
         return results.getList();
     }
 
+    /**
+     * Stops all threads. All unfinished mappings leave in undefined state.
+     * */
     @Override
     public void close() {
         stream(workers).forEach(Thread::interrupt);

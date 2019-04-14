@@ -11,51 +11,115 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Scalar iterative parallelism class.
+ *
+ * @author Pavel Ponomarev (pavponn@gmail.com)
+ */
 public class IterativeParallelism implements ScalarIP {
     private ParallelMapper mapper;
 
+    /**
+     * Default constructor. Allocates <code>IterativeMapper </code> object and
+     * sets <code>mapper</code> to <code>null</code>.
+     */
     public  IterativeParallelism() {
         mapper = null;
     }
 
+    /**
+     * Allocates <code>IterativeMapper</code> object and sets <code>mapper</code> to specified mapper.
+     *
+     * @param mapper mapper which is set as object's <code>mapper</code>.
+     */
     public IterativeParallelism(ParallelMapper mapper) {
         this.mapper = mapper;
     }
 
+    /**
+     * Returns maximum value.
+     *
+     * @param threads number or concurrent threads.
+     * @param values values to get maximum of.
+     * @param comparator value comparator.
+     * @param <T> value type.
+     *
+     * @return maximum of given values
+     *
+     * @throws InterruptedException if executing thread was interrupted.
+     * @throws java.util.NoSuchElementException if not values are given.
+     */
     @Override
-    public <T> T maximum(int i, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException,
+    public <T> T maximum(int threads, List<? extends T> values, Comparator<? super T> comparator) throws InterruptedException,
             IllegalArgumentException {
-        if (list == null || comparator == null) {
+        if (values == null || comparator == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }
-        return calculateFunction(list, i, x -> x.max(comparator).orElseThrow()).stream().max(comparator).orElseThrow();
+        return calculateFunction(values, threads, x -> x.max(comparator).orElseThrow()).stream().max(comparator).orElseThrow();
     }
 
+    /**
+     * Returns minimum value.
+     *
+     * @param threads number or concurrent threads.
+     * @param values values to get minimum of.
+     * @param comparator value comparator.
+     * @param <T> value type.
+     *
+     * @return minimum of given values
+     *
+     * @throws InterruptedException if executing thread was interrupted.
+     * @throws java.util.NoSuchElementException if not values are given.
+     */
     @Override
-    public <T> T minimum(int i, List<? extends T> list, Comparator<? super T> comparator) throws InterruptedException,
+    public <T> T minimum(int threads, List<? extends T> values, Comparator<? super T> comparator) throws InterruptedException,
             IllegalArgumentException {
-        if (list == null || comparator == null) {
+        if (values == null || comparator == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }
-        return maximum(i, list, comparator.reversed());
+        return maximum(threads, values, comparator.reversed());
     }
 
+    /**
+     * Returns whether any of values satisfies predicate.
+     *
+     * @param threads number or concurrent threads.
+     * @param values values to test.
+     * @param predicate test predicate.
+     * @param <T> value type.
+     *
+     * @return whether any value satisfies predicate or {@code false}, if no values are given.
+     *
+     * @throws InterruptedException if executing thread was interrupted.
+     */
     @Override
-    public <T> boolean any(int i, List<? extends T> list, Predicate<? super T> predicate) throws InterruptedException,
+    public <T> boolean any(int threads, List<? extends T> values, Predicate<? super T> predicate) throws InterruptedException,
             IllegalArgumentException {
-        if (list == null || predicate == null) {
+        if (values == null || predicate == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }
-        return calculateFunction(list, i, x -> x.anyMatch(predicate)).stream().anyMatch(Boolean::booleanValue);
+        return calculateFunction(values, threads, x -> x.anyMatch(predicate)).stream().anyMatch(Boolean::booleanValue);
     }
 
+    /**
+     * Returns whether all values satisfies predicate.
+     *
+     * @param threads number or concurrent threads.
+     * @param values values to test.
+     * @param predicate test predicate.
+     * @param <T> value type.
+     *
+     * @return whether all values satisfies predicate or {@code true}, if no values are given.
+     *
+     * @throws InterruptedException if executing thread was interrupted.
+     */
     @Override
-    public <T> boolean all(int i, List<? extends T> list, Predicate<? super T> predicate) throws InterruptedException,
+    public <T> boolean all(int threads, List<? extends T> values, Predicate<? super T> predicate) throws InterruptedException,
             IllegalArgumentException {
-        if (list == null || predicate == null) {
+        if (values == null || predicate == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }
-        return !any(i, list, predicate.negate());
+        return !any(threads, values, predicate.negate());
     }
 
     private <T, E> List<E> calculateFunction(List<? extends T> list, int threadsNumber,
