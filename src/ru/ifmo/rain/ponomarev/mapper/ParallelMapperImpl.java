@@ -60,11 +60,11 @@ public class ParallelMapperImpl implements ParallelMapper {
 
     /**
      * Stops all threads. All unfinished mappings leave in undefined state.
-     * */
+     */
     @Override
     public void close() {
         stream(workers).forEach(Thread::interrupt);
-        waitThreads(workers);
+        waitThreads();
     }
 
     private void add(Runnable newTask) throws InterruptedException {
@@ -73,7 +73,7 @@ public class ParallelMapperImpl implements ParallelMapper {
                 queue.wait();
             }
             queue.add(newTask);
-            queue.notifyAll();
+            queue.notify();
         }
     }
 
@@ -84,14 +84,14 @@ public class ParallelMapperImpl implements ParallelMapper {
                 queue.wait();
             }
             task = queue.poll();
-            queue.notifyAll();
+            queue.notify();
         }
         task.run();
     }
 
-    private static boolean waitThreads(Thread[] threads) {
+    private boolean waitThreads() {
         boolean noException = true;
-        for (Thread thread : threads) {
+        for (Thread thread : workers) {
             try {
                 thread.join();
             } catch (InterruptedException e) {
