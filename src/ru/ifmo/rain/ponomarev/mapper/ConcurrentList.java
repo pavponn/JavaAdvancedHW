@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * ConcurrentList class for {@link info.kgeorgiy.java.advanced.mapper.ParallelMapper}.
+ * ConcurrentList class for {@link ParallelMapperImpl}.
  *
  * @author Pavel Ponomarev (pavponn@gmail.com)
  */

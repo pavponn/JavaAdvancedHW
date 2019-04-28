@@ -93,8 +93,8 @@ public class IterativeParallelism implements ScalarIP {
      * @throws InterruptedException if executing thread was interrupted.
      */
     @Override
-    public <T> boolean any(int threads, List<? extends T> values, Predicate<? super T> predicate) throws InterruptedException,
-            IllegalArgumentException {
+    public <T> boolean any(int threads, List<? extends T> values, Predicate<? super T> predicate)
+            throws InterruptedException, IllegalArgumentException {
         if (values == null || predicate == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }
@@ -109,13 +109,13 @@ public class IterativeParallelism implements ScalarIP {
      * @param predicate test predicate.
      * @param <T> value type.
      *
-     * @return whether all values satisfies predicate or {@code true}, if no values are given.
+     * @return whether all values satisfy predicate or {@code true}, if no values are given.
      *
      * @throws InterruptedException if executing thread was interrupted.
      */
     @Override
-    public <T> boolean all(int threads, List<? extends T> values, Predicate<? super T> predicate) throws InterruptedException,
-            IllegalArgumentException {
+    public <T> boolean all(int threads, List<? extends T> values, Predicate<? super T> predicate)
+            throws InterruptedException, IllegalArgumentException {
         if (values == null || predicate == null) {
             throw new IllegalArgumentException("Arguments can't be null");
         }

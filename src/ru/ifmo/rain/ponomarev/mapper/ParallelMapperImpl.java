@@ -9,6 +9,11 @@ import java.util.function.Function;
 
 import static java.util.Arrays.stream;
 
+/**
+ * Class ParallelMapperImpl which implements {@link ParallelMapper}. Class is used as
+ * a part of IterativeParallelism.
+ * @author Pavel Ponomarev (pavponn@gmail.com)
+ */
 public class ParallelMapperImpl implements ParallelMapper {
     private Thread[] workers;
     private final Queue<Runnable> queue;
@@ -17,7 +22,7 @@ public class ParallelMapperImpl implements ParallelMapper {
     /**
      * Allocates <code>ParallelMapper</code> object and sets <code>mapper</code> to specified mapper.
      * @param threads number of threads to be used.
-     * @throws IllegalArgumentException if <code>threads</code> are less then 1.
+     * @throws IllegalArgumentException if <code>threads</code> less then 1.
      */
     public ParallelMapperImpl(int threads) throws IllegalArgumentException {
         if (threads < 1) {
@@ -37,15 +42,16 @@ public class ParallelMapperImpl implements ParallelMapper {
                     Thread.currentThread().interrupt();
                 }
             });
-            thread.start();
             workers[i] = thread;
+            workers[i].start();
         }
     }
 
     /**
-     * Maps function {@code f} over specified {@code args}.
+     * Maps function {@code function} over specified {@code list}.
      * Mapping for each element performs in parallel.
-     *
+     * @param function function to be applied
+     * @param list list to apply function on
      * @throws InterruptedException if calling thread was interrupted
      */
     @Override
@@ -53,7 +59,8 @@ public class ParallelMapperImpl implements ParallelMapper {
         final ConcurrentList<R> results = new ConcurrentList<>(list.size());
         for (int i = 0; i < list.size(); ++i) {
             final int finalIndex = i;
-            add(() -> results.set(finalIndex, function.apply(list.get(finalIndex))));
+            Runnable newTask = () -> results.set(finalIndex, function.apply(list.get(finalIndex)));
+            add(newTask);
         }
         return results.getList();
     }
