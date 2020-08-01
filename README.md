@@ -1,4 +1,4 @@
-# JavaAdvancedHW
+# 🏫 JavaAdvanced HW
 
 [Условия домашних заданий](http://www.kgeorgiy.info/courses/java-advanced/homeworks.html)
 
